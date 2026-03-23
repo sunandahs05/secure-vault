@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SecureVault",
-  "version": "2.0.0",
-  "description": "OS-inspired sandboxed payment vault — Shadow DOM isolation, AES-256-GCM, WASM crypto.",
+  "version": "1.0.0",
+  "description": "OS-inspired sandboxed payment vault with process isolation and memory encryption.",
 
   "icons": {
     "16":  "assets/icons/16.png",
@@ -25,15 +25,109 @@
   },
 
   "background": {
-    "service_worker": "dist/background.js"
+    "service_worker": "dist/background.js",
+    "type": "module"
   },
 
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["dist/content.js"],
-      "run_at": "document_idle",
+      "_comment": "Top-level frame injection — checkout, payment, billing pages",
+      "matches": [
+        "https://*/*checkout*",
+        "https://*/*payment*",
+        "https://*/*billing*",
+        "https://*/*/pay/*",
+        "https://*/*/pay",
+        "https://*/*/cart*",
+        "https://*/*/order*",
+        "https://*/*/buy/*",
+        "https://*/*/purchase*",
+
+        "https://*.stripe.com/*",
+        "https://*.paypal.com/*",
+        "https://*.razorpay.com/*",
+        "https://*.paytm.in/*",
+        "https://*.payu.in/*",
+        "https://*.payumoney.com/*",
+        "https://*.ccavenue.com/*",
+        "https://*.billdesk.com/*",
+        "https://*.cashfree.com/*",
+        "https://*.easebuzz.in/*",
+        "https://*.instamojo.com/*",
+        "https://*.zaakpay.com/*",
+
+        "https://securegw.paytm.in/*",
+        "https://securegw-stage.paytm.in/*",
+        "https://*.checkout.com/*",
+        "https://*.adyen.com/*",
+        "https://*.braintreegateway.com/*",
+        "https://*.squareup.com/*",
+        "https://*.klarna.com/*",
+        "https://*.afterpay.com/*",
+        "https://*.affirm.com/*",
+
+        "https://*.amazon.in/*",
+        "https://*.amazon.com/*",
+        "https://*.amazon.co.uk/*",
+        "https://*.flipkart.com/*",
+        "https://*.myntra.com/*",
+        "https://*.nykaa.com/*",
+
+        "https://*.hdfcbank.com/*",
+        "https://*.icicibank.com/*",
+        "https://*.axisbank.com/*",
+        "https://*.axisbank.co.in/*",
+        "https://*.sbi.co.in/*",
+        "https://retail.onlinesbi.sbi/*",
+        "https://*.onlinesbi.com/*",
+        "https://*.kotak.com/*",
+        "https://*.yesbank.in/*",
+        "https://*.indusind.com/*",
+        "https://*.idfcfirstbank.com/*",
+        "https://*.federalbank.co.in/*",
+        "https://*.rblbank.com/*",
+        "https://*.canarabank.in/*",
+        "https://*.unionbankofindia.co.in/*",
+        "https://*.pnbindia.in/*",
+        "https://*.bankofbaroda.in/*",
+        "https://*.chase.com/*",
+        "https://*.bankofamerica.com/*",
+        "https://*.wellsfargo.com/*",
+        "https://*.citibank.com/*",
+        "https://*.hsbc.com/*",
+        "https://*.barclays.co.uk/*",
+        "https://*.lloydsbank.com/*",
+        "https://*.natwest.com/*",
+        "https://*.santander.co.uk/*"
+      ],
+      "js":       ["dist/content.js"],
+      "run_at":   "document_idle",
       "all_frames": false
+    },
+    {
+      "_comment": "Iframe injection — 3DS auth frames, embedded payment SDKs",
+      "matches": [
+        "https://*.3ds.websdk.amazon.dev/*",
+        "https://*.acs.mastercard.com/*",
+        "https://*.verified-by-visa.com/*",
+        "https://*.safekey.com/*",
+        "https://*.3dsecure.io/*",
+        "https://*.payu.in/*",
+        "https://*.paytm.in/*",
+        "https://*.razorpay.com/*",
+        "https://*.stripe.com/*",
+        "https://*.braintreegateway.com/*",
+        "https://*.paypal.com/*",
+        "https://*.adyen.com/*",
+        "https://*.checkout.com/*",
+        "https://*.ccavenue.com/*",
+        "https://*.billdesk.com/*",
+        "https://securegw.paytm.in/*",
+        "https://*.cashfree.com/*"
+      ],
+      "js":       ["dist/content.js"],
+      "run_at":   "document_idle",
+      "all_frames": true
     }
   ],
 
@@ -47,26 +141,20 @@
   ],
 
   "host_permissions": [
-    "https://*/*",
-    "http://*/*"
+    "https://*/*"
   ],
 
   "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
 
   "web_accessible_resources": [
     {
       "resources": [
-        "src/vault/ui/*.js",
-        "src/vault/ui/*.css",
-        "src/vault/model/*.js",
-        "src/vault/storage/*.js",
-        "src/vault/input/*.js",
-        "src/auth/*.js",
-        "src/crypto/*.js",
-        "src/wasm/crypto_engine.wasm",
-        "dist/vault.js"
+        "src/vault/ui/vault_container.html",
+        "src/vault/ui/vault_container.css",
+        "dist/vault.js",
+        "src/wasm/crypto_engine.wasm"
       ],
       "matches": ["<all_urls>"]
     }
@@ -74,6 +162,10 @@
 
   "oauth2": {
     "client_id": "128586974344-crls3f5vn6h8q1peephv2m0fh8856kl3.apps.googleusercontent.com",
-    "scopes": ["openid", "email", "profile"]
+    "scopes": [
+      "openid",
+      "email",
+      "profile"
+    ]
   }
 }
